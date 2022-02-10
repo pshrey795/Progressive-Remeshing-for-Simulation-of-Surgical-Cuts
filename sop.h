@@ -38,9 +38,9 @@ public:
     void update_springs(){
         for(int i=0;i<particles.size();i++){
             for(int j=0;j<springs[i].size();j++){
-                double dx = particles[i]->get_pos().x() - particles[j]->get_pos().x();
-                double dy = particles[i]->get_pos().y() - particles[j]->get_pos().y();
-                double dz = particles[i]->get_pos().z() - particles[j]->get_pos().z();
+                double dx = particles[i]->get_pos().x() - particles[springs[i][j].first]->get_pos().x();
+                double dy = particles[i]->get_pos().y() - particles[springs[i][j].first]->get_pos().y();
+                double dz = particles[i]->get_pos().z() - particles[springs[i][j].first]->get_pos().z();
                 double d = sqrt(dx*dx + dy*dy + dz*dz);
                 springs[i][j].second->l = d;
             }
@@ -53,7 +53,7 @@ public:
             vec3d force = vec3d(0,0,0);
             for (int j=0;j<springs[i].size();j++){
                 vec3d spring_force = unit_vec( particles[springs[i][j].first]->get_pos() - particles[i]->get_pos() );
-                spring_force *= springs[i][j].second->k * (springs[i][j].second->l - springs[i][j].second->l0);
+                spring_force *= (springs[i][j].second->k * (springs[i][j].second->l - springs[i][j].second->l0));
                 force += spring_force;
             }
             particles[i]->set_force(force);
