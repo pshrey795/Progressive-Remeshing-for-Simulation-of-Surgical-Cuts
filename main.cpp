@@ -34,11 +34,14 @@ int main(int argc, char** argv){
     s = new sop();
     s->add_particle(new particle(1,vec3d(0,10,0),vec3d(0,0,0), true));
     s->add_particle(new particle(1,vec3d(3,8,0),vec3d(0,0,0)));
+    s->add_particle(new particle(1,vec3d(5,6,0),vec3d(0,0,0)));
     s->add_particle(new particle(1,vec3d(7,8,0),vec3d(0,0,0)));
     s->add_particle(new particle(1,vec3d(10,10,0),vec3d(0,0,0),true));
-    s->add_spring(0,1,5,2,2);
-    s->add_spring(1,2,10,3,3);
-    s->add_spring(2,3,5,2,2);
+    s->add_spring(0,1,8,2,2);
+    s->add_spring(1,2,5,3,3);
+    s->add_spring(1,3,5,3,3);
+    s->add_spring(2,3,7,3,3);
+    s->add_spring(3,4,8,2,2);
 
     glutDisplayFunc(simulate);
     glutMainLoop();
