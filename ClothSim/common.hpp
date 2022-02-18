@@ -1,7 +1,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
+#include <bits/stdc++.h>
 
 #if __APPLE__
 #include <OpenGL/gl.h>

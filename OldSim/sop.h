@@ -49,6 +49,7 @@ public:
 
     // make a function to update particles
     void update_particles(float dt){
+        this->update_springs();
         for(int i=0;i<particles.size();i++){
             vec3d force = vec3d(0,0,0);
             for (int j=0;j<springs[i].size();j++){
