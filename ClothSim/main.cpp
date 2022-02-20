@@ -35,7 +35,7 @@ void drawWorld() {
     lighting.apply();
     clear(vec3(0.5,0.7,0.9));
     setColor(vec3(0.7,0.7,0.7));
-    drawQuad(vec3(-3,-0,-3), vec3(-3,0,3), vec3(3,0,3), vec3(3,0,-3));
+    //drawQuad(vec3(-3,-0,-3), vec3(-3,0,3), vec3(3,0,3), vec3(3,0,-3));
     drawStuff();
     setColor(vec3(0,0,0));
     text.draw("WASD and LShift/LCtrl to move camera", -0.9, 0.90);
@@ -45,7 +45,7 @@ void drawWorld() {
 
 void update(float dt) {
     t += dt;
-    psys.update_particles(dt,0);
+    psys.update_particles(dt,1);
 }
 
 void keyPressed(int key) {

@@ -78,12 +78,12 @@ Matrix<float,Dynamic, Dynamic> explode(Matrix<mat3,Dynamic,Dynamic> A, int size)
     return res;
 }
 
-Matrix<mat3,Dynamic,Dynamic> implode(Matrix<float,Dynamic,Dynamic> A,int size){
+Matrix<mat3,Dynamic,Dynamic> combine(Matrix<float,Dynamic,Dynamic> A,int size){
     Matrix<mat3,Dynamic,Dynamic> res;
     res.resize(size,size);
-    for(int i=0;i<size;i++){
-        for(int j=0;j<size;j++){
-            res(i,j)(i%3,j%3) = A(i,j);
+    for(int i=0;i<3*size;i++){
+        for(int j=0;j<3*size;j++){
+            res(i/3,j/3)(i%3,j%3) = A(i,j);
         }
     }
     return res;
