@@ -13,7 +13,7 @@ class particle{
         vec3 force;
         vec3 color;
         bool isClamped;
-        particle(float m, vec3 p, vec3 v=vec3(0,0,0), bool is_clamped=false, vec3 c = vec3(0.1,0.7,0.3)){
+        particle(float m, vec3 p, vec3 v=vec3(0,0,0), bool is_clamped=false, vec3 c = vec3(0.9,0.5,0.5)){
             this->mass = m;
             this->pos = p;
             this->vel = v;

@@ -21,7 +21,7 @@ class particle_system {
         Matrix<vec3, Dynamic, 1> x;
         Matrix<vec3, Dynamic, 1> v;
         Matrix<vec3, Dynamic, 1> f;
-        Matrix<vec3, Dynamic, Dynamic> Jx;
+        Matrix<mat3, Dynamic, Dynamic> Jx;
         int n;
         int m;
 
@@ -41,7 +41,12 @@ class particle_system {
             //Other rows
             for(int j=1;j<m;j++){
                 for(int i=0;i<=n;i++){
-                    this->add_particle(new particle(1,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
+                    if(i==0 || i==n){
+                        this->add_particle(new particle(1,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
+                    }else{
+                        this->add_particle(new particle(1,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
+                    }
+                    
                 }
             }
 
@@ -57,21 +62,21 @@ class particle_system {
                     if(j==m){
                         if(i!=n){
                             //Horizontal structural spring
-                            this->add_spring((num_x)*j+i,(num_x)*j+i+1,50,0.5/n,0.5/n);
+                            this->add_spring((num_x)*j+i,(num_x)*j+i+1,150,0.5/n,0.5/n);
                         }
                     }else{
                         if(i!=n){
                             //Horizontal structural spring
-                            this->add_spring((num_x)*j+i,(num_x)*j+i+1,50,0.5/n,0.5/n);
+                            this->add_spring((num_x)*j+i,(num_x)*j+i+1,150,0.5/n,0.5/n);
                             //Right shear spring
-                            this->add_spring((num_x)*j+i,(num_x)*j+i+num_x+1,50,0.5/m,0.5/m);
+                            this->add_spring((num_x)*j+i,(num_x)*j+i+num_x+1,150,0.5/m,0.5/m);
                         }
                         if(i!=0){
                             //Left shear spring
-                            this->add_spring((num_x)*j+i,(num_x)*j+i+num_x-1,50,0.5/m,0.5/m);
+                            this->add_spring((num_x)*j+i,(num_x)*j+i+num_x-1,150,0.5/m,0.5/m);
                         }
                         //Vertical structural spring
-                        this->add_spring((num_x)*j+i,(num_x)*j+i+num_x,200,0.5/m,0.5/m);
+                        this->add_spring((num_x)*j+i,(num_x)*j+i+num_x,150,0.5/m,0.5/m);
                     }
                 }
             }
@@ -93,28 +98,31 @@ class particle_system {
                 M(i,i) = particles[i]->mass;
             }
         }
-        void update_particles(float dt){
-            for(int i=0;i<particles.size();i++){
+        void update_particles(float dt,int id){
+            int num = particles.size();
+            for(int i=0;i<num;i++){
                 f(i) = particles[i]->mass*gravity + net_force(i);
             }
 
-            //Forward Euler
-            //Update velocities
-            v = v + (dt * matrix_vector_mult(M.inverse(),f,particles.size()));
+            if(id==0){
+                //Update velocities(Forward Euler)
+                v = v + (dt * matrix_mult(convert(M.inverse(),num),f,num));
+            }else{
+                //Update velocities(Backward Euler)
+                Matrix<mat3,Dynamic,Dynamic> K;
+                K = implode((explode(convert(M,num),num) - dt * dt * explode(Jx,num)).inverse(),num);
+                v = v + (dt * matrix_mult(K,f + matrix_mult(Jx,v,num),num));
+            }
 
             //Explicit clamping   
-            for(int i=0;i<particles.size();i++){
+            for(int i=0;i<num;i++){
                 if(particles[i]->isClamped){
                     v(i) = vec3(0,0,0);
                 }
             }
 
             //dx = (v + dv) * dt
-            x = x + (dt * v);
-
-
-            //Backward Euler
-
+            x = x + (dt * v);          
 
             //Storing computed x,v,f values for rendering
             this->storeValues();

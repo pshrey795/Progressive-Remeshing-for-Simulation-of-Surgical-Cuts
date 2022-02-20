@@ -45,7 +45,7 @@ void drawWorld() {
 
 void update(float dt) {
     t += dt;
-    psys.update_particles(dt);
+    psys.update_particles(dt,0);
 }
 
 void keyPressed(int key) {
