@@ -14,17 +14,18 @@ Camera camera;
 Lighting lighting;
 Text text;
 
-float dt = 1/600.0;
+float dt = 1/60.0;
 float t = 0;
 bool paused = false;
 particle_system psys;
 
 void drawStuff() {
     //Poles to support cloth
-    setColor(vec3(0.8,0.2,0.2));
+    setColor(vec3(0,0,0));
     drawArrow(vec3(-1,0,0), vec3(0.5,1.5,0),0.05);
     drawArrow(vec3(1,0,0), vec3(-0.5,1.5,0),0.05);
-
+    drawArrow(vec3(-1,0,1), vec3(0.5,1.5,0),0.05);
+    drawArrow(vec3(1,0,1), vec3(-0.5,1.5,0),0.05);
     //Draw the cloth
     psys.drawCloth();
 }
@@ -59,7 +60,8 @@ int main(int argc, char **argv) {
     camera.lookAt(vec3(1,1.5,5), vec3(0,0.5,0));
     lighting.createDefault();
     text.initialize(); 
-    psys.setupGrid(200,50);
+    psys.setupGrid(5,5);
+    psys.initialise();
 
     while (!window.shouldClose()) {
         camera.processInput(window);
