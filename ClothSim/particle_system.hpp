@@ -64,6 +64,11 @@ class particle_system {
                         if(i!=n){
                             //Horizontal structural spring
                             this->add_spring((num_x)*j+i,(num_x)*j+i+1,10,0.5/n,0.5/n);
+
+                            // //Horizontal flexion spring
+                            // if(i!=n-1){
+                            //     this->add_spring((num_x)*j+i,(num_x)*j+i+2,10,0.5/n,0.5/n);
+                            // }
                         }
                     }else{
                         if(i!=n){
@@ -76,8 +81,18 @@ class particle_system {
                             //Left shear spring
                             this->add_spring((num_x)*j+i,(num_x)*j+i+num_x-1,10,0.5/m,0.5/m);
                         }
+                        // if(i<n-1){
+                        //     //Horizontal flexion spring
+                        //     this->add_spring((num_x)*j+i,(num_x)*j+i+2,10,0.5/n,0.5/n);
+                        // }
+
                         //Vertical structural spring
                         this->add_spring((num_x)*j+i,(num_x)*j+i+num_x,10,0.5/m,0.5/m);
+
+                        // //Vertical flexion spring   
+                        // if(j<m-1){
+                        //     this->add_spring((num_x)*j+i,(num_x)*j+i+num_x*2,10,0.5/m,0.5/m);
+                        // }
                     }
                 }
             }
@@ -131,6 +146,11 @@ class particle_system {
                 Jx(j,i) += Jji;
             }
 
+            //For error calculation
+            Matrix<vec3,Dynamic,1> v_old;
+            v_old.resize(num);
+            v_old = v;
+
             if(id==0){
                 //Update velocities(Forward Euler)
                 v = v + (dt * matrix_mult(convert(M.inverse(),num),f,num));
@@ -147,6 +167,17 @@ class particle_system {
                     v(i) = vec3(0,0,0);
                 }
             }
+
+            double error = 0;
+            v_old =  (1/dt) * (v - v_old);
+            for(int i=0;i<num;i++){
+                if(!particles[i]->isClamped){
+                    v_old(i) = particles[i]->mass * v_old(i);
+                    error += (f(i) - v_old(i)).norm();
+                }
+            }
+            error = error / (num-4);
+            cout << error << endl;
 
             //dx = (v + dv) * dt
             x = x + (dt * v);          
