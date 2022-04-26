@@ -35,7 +35,7 @@ class particle_system {
             int num_y = m+1;
             this->add_particle(new particle(0.8,vec3(-0.5,1.5,0),vec3(0,0,0),true));
             for(int i=1;i<n;i++){
-                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,0),vec3(0,0,0),false));
+                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,0),vec3(0,0,0),true));
             }
             this->add_particle(new particle(0.8,vec3(+0.5,1.5,0),vec3(0,0,0),true));
 
@@ -43,7 +43,7 @@ class particle_system {
             for(int j=1;j<m;j++){
                 for(int i=0;i<=n;i++){
                     if(i==0 || i==n){
-                        this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
+                        this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),true));
                     }else{
                         this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
                     }
@@ -53,7 +53,7 @@ class particle_system {
 
             this->add_particle(new particle(0.8,vec3(-0.5,1.5,1.0),vec3(0,0,0),true));
             for(int i=1;i<n;i++){
-                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,1.0),vec3(0,0,0),false));
+                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,1.0),vec3(0,0,0),true));
             }
             this->add_particle(new particle(0.8,vec3(+0.5,1.5,1.0),vec3(0,0,0),true));
 

@@ -38,9 +38,6 @@ void drawWorld() {
     //drawQuad(vec3(-3,-0,-3), vec3(-3,0,3), vec3(3,0,3), vec3(3,0,-3));
     drawStuff();
     setColor(vec3(0,0,0));
-    text.draw("WASD and LShift/LCtrl to move camera", -0.9, 0.90);
-    text.draw("Mouse to rotate view", -0.9, 0.85);
-    text.draw("Space to play/pause animation", -0.9, 0.80);
 }
 
 void update(float dt) {
