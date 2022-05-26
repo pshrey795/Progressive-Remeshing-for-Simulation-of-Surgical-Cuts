@@ -1,8 +1,9 @@
-CC=g++
-CFLAGS= -lGL -lGLU -lglfw
+CC = g++
+CFLAGS = -lGL -lGLU -lglfw
+MODE = 0
 
 run: simulation
-	./simulation
+	./simulation $(MODE)
 
 simulation: main.cpp
 	$(CC) -o simulation main.cpp $(CFLAGS)

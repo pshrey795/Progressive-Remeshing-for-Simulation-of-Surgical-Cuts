@@ -10,6 +10,7 @@ public:
     float yaw, pitch, dist;
     float fovy, moveSpeed, zoomSpeed, turnSpeed;
     float lastInputTime;
+    bool mousePressed;
     vec2 lastMousePos;
     Camera();
     void lookAt(vec3 eye, vec3 target);
@@ -22,6 +23,7 @@ protected:
 };
 
 Camera::Camera() :
+    mousePressed(false),
     target(vec3(0,0,0)),
     yaw(0), pitch(0), dist(2),
     fovy(M_PI/3), moveSpeed(1), zoomSpeed(1), turnSpeed(0.2),
@@ -37,6 +39,7 @@ void Camera::lookAt(vec3 eye, vec3 target) {
 }
 
 void Camera::processInput(Window &window) {
+    this->mousePressed = false;
     float currentTime = glfwGetTime();
     float dt = currentTime - lastInputTime;
     GLFWwindow *win = window.window;
@@ -54,6 +57,7 @@ void Camera::processInput(Window &window) {
         target -= getUpVector()*moveSpeed*dt;
     vec2 mousePos = window.mousePos();
     if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        this->mousePressed = true;
         yaw -= (mousePos[0] - lastMousePos[0])*turnSpeed*M_PI/180;
         pitch -= (mousePos[1] - lastMousePos[1])*turnSpeed*M_PI/180;
     }

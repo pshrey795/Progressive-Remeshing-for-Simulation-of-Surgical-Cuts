@@ -7,6 +7,8 @@
 using namespace std;
 using namespace Eigen;
 
+#define K_DAMP 2
+
 struct spring{
     double k;
     double l;
@@ -23,6 +25,7 @@ class particle_system {
         Matrix<vec3, Dynamic, 1> v;
         Matrix<vec3, Dynamic, 1> f;
         Matrix<mat3, Dynamic, Dynamic> Jx;
+        Matrix<mat3, Dynamic, Dynamic> Jv;
         int n;
         int m;
 
@@ -35,7 +38,7 @@ class particle_system {
             int num_y = m+1;
             this->add_particle(new particle(0.8,vec3(-0.5,1.5,0),vec3(0,0,0),true));
             for(int i=1;i<n;i++){
-                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,0),vec3(0,0,0),true));
+                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,0),vec3(0,0,0),false));
             }
             this->add_particle(new particle(0.8,vec3(+0.5,1.5,0),vec3(0,0,0),true));
 
@@ -43,7 +46,7 @@ class particle_system {
             for(int j=1;j<m;j++){
                 for(int i=0;i<=n;i++){
                     if(i==0 || i==n){
-                        this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),true));
+                        this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
                     }else{
                         this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,j*1.0/m),vec3(0,0,0),false));
                     }
@@ -51,9 +54,10 @@ class particle_system {
                 }
             }
 
+            //Last row
             this->add_particle(new particle(0.8,vec3(-0.5,1.5,1.0),vec3(0,0,0),true));
             for(int i=1;i<n;i++){
-                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,1.0),vec3(0,0,0),true));
+                this->add_particle(new particle(0.8,vec3(-0.5+i*1.0/n,1.5,1.0),vec3(0,0,0),false));
             }
             this->add_particle(new particle(0.8,vec3(+0.5,1.5,1.0),vec3(0,0,0),true));
 
@@ -64,11 +68,11 @@ class particle_system {
                         if(i!=n){
                             //Horizontal structural spring
                             this->add_spring((num_x)*j+i,(num_x)*j+i+1,10,0.5/n,0.5/n);
-
-                            // //Horizontal flexion spring
-                            // if(i!=n-1){
-                            //     this->add_spring((num_x)*j+i,(num_x)*j+i+2,10,0.5/n,0.5/n);
-                            // }
+                            
+                            //Horizontal flexion spring
+                            if(i!=n-1){
+                                this->add_spring((num_x)*j+i,(num_x)*j+i+2,10,0.5/n,0.5/n);
+                            }
                         }
                     }else{
                         if(i!=n){
@@ -81,18 +85,18 @@ class particle_system {
                             //Left shear spring
                             this->add_spring((num_x)*j+i,(num_x)*j+i+num_x-1,10,0.5/m,0.5/m);
                         }
-                        // if(i<n-1){
-                        //     //Horizontal flexion spring
-                        //     this->add_spring((num_x)*j+i,(num_x)*j+i+2,10,0.5/n,0.5/n);
-                        // }
+                        if(i<n-1){
+                            //Horizontal flexion spring
+                            this->add_spring((num_x)*j+i,(num_x)*j+i+2,10,0.5/n,0.5/n);
+                        }
 
                         //Vertical structural spring
                         this->add_spring((num_x)*j+i,(num_x)*j+i+num_x,10,0.5/m,0.5/m);
 
-                        // //Vertical flexion spring   
-                        // if(j<m-1){
-                        //     this->add_spring((num_x)*j+i,(num_x)*j+i+num_x*2,10,0.5/m,0.5/m);
-                        // }
+                        //Vertical flexion spring   
+                        if(j<m-1){
+                            this->add_spring((num_x)*j+i,(num_x)*j+i+num_x*2,10,0.5/m,0.5/m);
+                        }
                     }
                 }
             }
@@ -103,6 +107,7 @@ class particle_system {
             v.resize(particles.size());
             f.resize(particles.size());
             Jx.resize(particles.size(),particles.size());
+            Jv.resize(particles.size(),particles.size());
             for(int i=0;i<particles.size();i++){
                 x(i) = particles[i]->pos;
                 v(i) = particles[i]->vel;
@@ -135,21 +140,26 @@ class particle_system {
 
                 mat3 d1 = dij * dij.transpose();
                 mat3 d2 = dji * dji.transpose();
-                mat3 Jii = -(ks * (m*(mat3::Identity() - d1) + d1));
-                mat3 Jjj = -(ks * (m*(mat3::Identity() - d2) + d2));
-                mat3 Jij = -Jii;
-                mat3 Jji = -Jjj;
+                mat3 Jxii = -(ks * (m*(mat3::Identity() - d1) + d1));
+                mat3 Jxjj = -(ks * (m*(mat3::Identity() - d2) + d2));
+                mat3 Jxij = -Jxjj;
+                mat3 Jxji = -Jxii;
 
-                Jx(i,i) += Jii;
-                Jx(j,j) += Jjj;
-                Jx(i,j) += Jij;
-                Jx(j,i) += Jji;
+                mat3 Jvii = -(K_DAMP * d1);
+                mat3 Jvjj = -(K_DAMP * d2);
+                mat3 Jvij = -Jvjj;
+                mat3 Jvji = -Jvii;
+
+                Jx(i,i) += Jxii;
+                Jx(j,j) += Jxjj;
+                Jx(i,j) += Jxij;
+                Jx(j,i) += Jxji;
+
+                Jv(i,i) += Jvii;
+                Jv(j,j) += Jvjj;
+                Jv(i,j) += Jvij;
+                Jv(j,i) += Jvji;
             }
-
-            //For error calculation
-            Matrix<vec3,Dynamic,1> v_old;
-            v_old.resize(num);
-            v_old = v;
 
             if(id==0){
                 //Update velocities(Forward Euler)
@@ -157,7 +167,7 @@ class particle_system {
             }else{
                 //Update velocities(Backward Euler)
                 Matrix<mat3,Dynamic,Dynamic> K;
-                K = combine((explode(convert(M,num),3*num) - dt * dt * explode(Jx,3*num)).inverse(),num);
+                K = combine((explode(convert(M,num),3*num) - dt * dt * explode(Jx,3*num) - dt * explode(Jv,3*num)).inverse(),num);
                 v = v + (dt * matrix_mult(K,f + matrix_mult(Jx,v,num),num));
             }
 
@@ -168,24 +178,13 @@ class particle_system {
                 }
             }
 
-            double error = 0;
-            v_old =  (1/dt) * (v - v_old);
-            for(int i=0;i<num;i++){
-                if(!particles[i]->isClamped){
-                    v_old(i) = particles[i]->mass * v_old(i);
-                    error += (f(i) - v_old(i)).norm();
-                }
-            }
-            error = error / (num-4);
-            cout << error << endl;
-
             //dx = (v + dv) * dt
             x = x + (dt * v);          
 
             //Storing computed x,v,f values for rendering
             this->storeValues();
         }
-        void drawCloth(){
+        void drawGrid(){
             setPointSize(10);
             for(int j=0;j<m;j++){
                 for(int i=0;i<n;i++){
@@ -225,15 +224,25 @@ class particle_system {
         vec3 spring_force(int i,int j){
             vec3 xi = particles[i]->pos;
             vec3 xj = particles[springs[i][j].first]->pos;
-            vec3 xij = (xj-xi).normalized();
+            vec3 dij = (xi-xj).normalized();
             springs[i][j].second->l = (xj-xi).norm();
-            vec3 fij = xij*(springs[i][j].second->k*(springs[i][j].second->l-springs[i][j].second->l0));
+            vec3 fij = (-1) * dij * (springs[i][j].second->k*(springs[i][j].second->l - springs[i][j].second->l0));
             return fij;
+        }
+        vec3 damp_force(int i, int j){
+            vec3 vi = particles[i]->vel;
+            vec3 vj = particles[springs[i][j].first]->vel;
+            vec3 xi = particles[i]->pos;
+            vec3 xj = particles[springs[i][j].first]->pos;
+            vec3 dij = (xi-xj).normalized();
+            vec3 vij = vi - vj;
+            vec3 fij = (-1) * dij * (vij.dot(dij)) * K_DAMP;
+            return fij; 
         }
         vec3 net_force(int i){
             vec3 force = vec3(0,0,0);
             for(int j=0;j<springs[i].size();j++){
-                force += spring_force(i,j);
+                force += spring_force(i,j) + damp_force(i,j);
             }
             return force;
         }

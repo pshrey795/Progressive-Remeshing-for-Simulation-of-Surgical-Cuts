@@ -11,16 +11,12 @@ void setLineWidth(float w);
 void drawLine(vec3 x0, vec3 x1);
 void drawArrow(vec3 base, vec3 vector, float thick);
 void drawAxes();
-
 void drawTri(vec3 x0, vec3 x1, vec3 x2);
 void drawQuad(vec3 x0, vec3 x1, vec3 x2, vec3 x3);
 
 // for smooth shading, provide surface normal at each vertex
-void drawTri(vec3 x0, vec3 x1, vec3 x2,
-             vec3 n0, vec3 n1, vec3 n2);
-void drawQuad(vec3 x0, vec3 x1, vec3 x2, vec3 x3,
-              vec3 n0, vec3 n1, vec3 n2, vec3 n3);
-
+void drawTri(vec3 x0, vec3 x1, vec3 x2, vec3 n0, vec3 n1, vec3 n2);
+void drawQuad(vec3 x0, vec3 x1, vec3 x2, vec3 x3, vec3 n0, vec3 n1, vec3 n2, vec3 n3);
 void drawBox(vec3 xmin, vec3 xmax);
 void drawSphere(vec3 center, float radius);
 
@@ -88,8 +84,7 @@ void drawQuad(vec3 x0, vec3 x1, vec3 x2, vec3 x3) {
     glEnd();
 }
 
-void drawQuad(vec3 x0, vec3 x1, vec3 x2, vec3 x3,
-              vec3 n0, vec3 n1, vec3 n2, vec3 n3) {
+void drawQuad(vec3 x0, vec3 x1, vec3 x2, vec3 x3, vec3 n0, vec3 n1, vec3 n2, vec3 n3) {
     glBegin(GL_QUADS);
     glNormal3f(n0[0], n0[1], n0[2]);
     glVertex3f(x0[0], x0[1], x0[2]);
