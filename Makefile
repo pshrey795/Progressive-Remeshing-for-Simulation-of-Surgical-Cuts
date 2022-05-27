@@ -5,7 +5,7 @@ MODE = 0
 run: simulation
 	./simulation $(MODE)
 
-simulation: main.cpp
+simulation: main.cpp mesh.hpp half_edge.hpp
 	$(CC) -o simulation main.cpp $(CFLAGS)
 
 clean:

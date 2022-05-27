@@ -38,8 +38,7 @@ class Mesh {
         void setupMesh(vector<vec3> Vertices, vector<int> Indices);
         void renderMesh();
         void processInput(Camera cam, Window win);
-        void updateMesh(vec2 mousePos);
-        
+        void updateMesh(vec2 mousePos);   
 
 };
 
@@ -49,8 +48,29 @@ Mesh::Mesh(){
     vector<vec3> vertices;
     vector<int> indices;
 
+    vertices = {
+        vec3(-1, 1, 0),
+        vec3(-1, -1, -1),
+        vec3(1, -1, -1),
+        vec3(2, 1, 0),
+        vec3(0, 1, 0)
+        // {1, -1, 0}
+    };
+    indices = {
+        1, 2, 4,
+        2, 3, 4,
+        1, 4, 0
+    };
+
     //Fill data structures
     this->mesh = new HalfEdge(vertices, indices);
+
+    //Testing
+    auto intersectInfo = this->mesh->Intersect(Plane(vec3(0.0,0.0,0.0),vec3(1.0,1.0,0.0)));
+    for(auto x:intersectInfo){
+        vec3 points = get<0>(x);
+        cout << points[0] << " " << points[1] << " " << points[2] << " " << "\n";
+    }
 }
 
 //Rendering the mesh
