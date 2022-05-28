@@ -2,7 +2,6 @@
 #define HALFEDGE_HPP
 
 #include "common.hpp"
-#include "MeshPlaneIntersect.hpp"
 #include<bits/stdc++.h>
 
 using namespace std;
