@@ -43,7 +43,7 @@ void keyPressed(int key) {
 int main(int argc, char **argv) {
     window.create("Animation", 1024, 768);
     window.onKeyPress(keyPressed);
-    camera.lookAt(vec3(0,-1,0), vec3(0,0,0));
+    camera.lookAt(vec3(4,-4,4), vec3(0,0,0));
     lighting.createDefault();
 
     while (!window.shouldClose()) {
