@@ -282,8 +282,8 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
     Vertex* newVertex;
     Vertex* newVertexLeft;
     Vertex* newVertexRight;
-    Edge* newCrossEdgeLeft = new Edge();
-    Edge* newCrossEdgeRight = new Edge();
+    Edge* newCrossEdgeLeft;
+    Edge* newCrossEdgeRight;
     Edge* newSideEdgeLeft;
     Edge* newSideEdgeRight;
     
@@ -304,7 +304,10 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
             this->vertex_list.push_back(newVertexLeft);
         }else{
             newVertexLeft = lastVertex;
+
+            //Seg fault in this line; Investigate
             vec3 oldPos = newVertexLeft->position;
+            
             newVertexLeft->position = oldPos - normal * EPSILON;
             newVertexRight = new Vertex(oldPos + normal * EPSILON);
         }
@@ -368,6 +371,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                 //Edge to Edge relations
                 Edge* newEdge = new Edge();
                 newCrossEdgeLeft = currentEdge->twin;
+                newCrossEdgeRight = new Edge();
                 newCrossEdgeLeft->twin = newEdge;
                 newEdge->twin = newCrossEdgeLeft;
                 newCrossEdgeRight->twin = currentEdge;
@@ -396,7 +400,106 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                 this->edge_list.push_back(newCrossEdgeRight);
             }else if(nextType == 1){
                 //Current: Vertex, Next: Edge
+                newVertex = new Vertex(get<0>(nextIntPt));
+                this->vertex_list.push_back(newVertex);
+                int newIndex = this->vertex_list.size() - 1;
 
+                Edge* currentEdge = this->edge_list[get<2>(nextIntPt)];
+                if(currentEdge->prev == NULL){
+                    currentEdge = currentEdge->twin->prev;
+                }else{
+                    if(currentEdge->prev->startVertex == newVertexLeft){
+                        currentEdge = currentEdge->prev;
+                    }else{
+                        currentEdge = currentEdge->twin->prev;
+                    }
+                }
+                //Now, currentEdge is the edge starting from the the current 
+                //intersection point and adjacent to the cut
+
+                //Obtaining old vertex indices
+                int oldIndexLeft, oldIndexRight, centreIndex;
+                Face* oldFace = currentEdge->face;
+                if(oldFace->edge == currentEdge){
+                    centreIndex = oldFace->indices[0];
+                    oldIndexLeft = oldFace->indices[1];
+                    oldIndexRight = oldFace->indices[2];
+                }else if(oldFace->edge->next == currentEdge){
+                    centreIndex = oldFace->indices[1];
+                    oldIndexLeft = oldFace->indices[2];
+                    oldIndexRight = oldFace->indices[0];
+                }else{
+                    centreIndex = oldFace->indices[2];
+                    oldIndexLeft = oldFace->indices[0];
+                    oldIndexRight = oldFace->indices[1];
+                }
+
+                //Edge to Edge relations
+                Edge* newEdge1 = new Edge();
+                Edge* newEdge2 = new Edge();
+                Edge* newEdge3 = new Edge();
+                newCrossEdgeLeft = new Edge();
+                newCrossEdgeRight = new Edge();
+                newSideEdgeLeft = currentEdge->next->twin;
+                newSideEdgeRight = new Edge();
+
+                //Twin Edges
+                newCrossEdgeLeft->twin = newEdge1;
+                newEdge1->twin = newCrossEdgeLeft;
+                newCrossEdgeRight->twin = newEdge2;
+                newEdge2->twin = newCrossEdgeRight;
+                newSideEdgeLeft->twin = currentEdge->next;
+                currentEdge->next->twin = newSideEdgeRight;
+                newSideEdgeRight->twin = newEdge3;
+                newEdge3->twin = newSideEdgeRight;
+
+                //Next/Prev Edges
+                newCrossEdgeLeft->next = currentEdge;
+                newCrossEdgeLeft->prev = currentEdge->next;
+                newEdge2->next = newEdge3;
+                newEdge2->prev = currentEdge->prev;
+                newEdge3->next = currentEdge->prev;
+                newEdge3->prev = newEdge2;
+                currentEdge->prev->next = newEdge2;
+                currentEdge->prev->prev = newEdge3;
+                currentEdge->prev = newCrossEdgeLeft;
+                currentEdge->next->next = newCrossEdgeLeft;
+
+                //Edge to vertex relations
+                newCrossEdgeLeft->startVertex = newVertex;
+                newCrossEdgeRight->startVertex = newVertex;
+                newEdge1->startVertex = newVertexLeft;
+                newEdge2->startVertex = newVertexRight;
+                newEdge3->startVertex = newVertex;
+                newSideEdgeLeft->startVertex = newVertex;
+                newSideEdgeRight->startVertex = newEdge3->next->startVertex;
+                newEdge3->next->twin->startVertex = newVertexRight;
+
+                //Vertex to Edge relations
+                newVertex->edge = newCrossEdgeLeft;
+                newVertexLeft->edge = currentEdge;
+                newVertexRight->edge = newEdge2;
+
+                //Face to Vertex/Edge relations
+                oldFace->edge = currentEdge;
+                oldFace->setFace(newIndexLeft, oldIndexLeft, newIndex);
+                Face* newFace = new Face(newIndexRight, newIndex, oldIndexRight);
+                newFace->edge = newEdge2;
+
+                //Edge to Face relations
+                newCrossEdgeLeft->face = oldFace;
+                newEdge2->face = newFace;
+                newEdge3->face = newFace;
+                newEdge3->next->face = newFace;
+
+                //Adding the edges/faces
+                this->edge_list.push_back(newEdge1);
+                this->edge_list.push_back(newEdge2);
+                this->edge_list.push_back(newEdge3);
+                this->edge_list.push_back(newCrossEdgeLeft);
+                this->edge_list.push_back(newCrossEdgeRight);
+                this->edge_list.push_back(newSideEdgeRight);
+                this->face_list.push_back(newFace);
             }else{
 
             }
@@ -412,6 +515,9 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
             //Depending on the type of the next vertex
             if(nextType == 0){
                 //Current: Edge, Next: Vertex
+
+                newCrossEdgeLeft = new Edge();
+                newCrossEdgeRight = new Edge();
 
                 int oldIndexLeft, oldIndexRight, oppIndex;
                 Edge* currentEdge = intersectingFace->edge;
@@ -494,8 +600,6 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                 this->face_list.push_back(newFace);
             }else if(nextType == 1){
                 //Current:Edge, Next:Edge
-                
-
 
             }else{
 

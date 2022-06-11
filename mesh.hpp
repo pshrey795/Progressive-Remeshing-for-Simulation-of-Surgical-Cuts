@@ -30,13 +30,13 @@ Mesh::Mesh(){
     vector<int> indices;
 
     vertices = {
-        vec3(0,0,0),
+        // vec3(0,0,0),
         vec3(0,1,0),
-        vec3(-1,0,0)
-        // vec3(-1,1,0)
+        vec3(-1,0,0),
+        vec3(-1,1,0)
     };
     indices = {
-        0, 1, 2
+        0, 2, 1
     };
 
     //Fill data structures
@@ -92,15 +92,15 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
     }
 
     //Remeshing starts here
-    Vertex* vertexLast = NULL;
-    Edge* crossEdgeLeft = NULL;
-    Edge* crossEdgeRight = NULL;
-    Edge* sideEdgeLeft = NULL;
-    Edge* sideEdgeRight = NULL;
+    Vertex* vertexLast;
+    Edge* crossEdgeLeft;
+    Edge* crossEdgeRight;
+    Edge* sideEdgeLeft;
+    Edge* sideEdgeRight;
 
     //Re-meshing for each intersection point
     assert(intersections.size() >= 2);
-    for(int i=0;i<intersections.size();i++){
+    for(int i=0;i<intersections.size()-1;i++){
         if(i==0){
             this->mesh->reMesh(intersections[i], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
         }else if(i==intersections.size()-1){
