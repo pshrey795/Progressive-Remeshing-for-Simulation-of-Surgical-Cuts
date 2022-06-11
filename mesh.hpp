@@ -30,22 +30,19 @@ Mesh::Mesh(){
     vector<int> indices;
 
     vertices = {
+        vec3(0,0,0),
         vec3(0,1,0),
-        vec3(-1,0,0),
-        vec3(0,0,-1),
-        vec3(-1,1,0)
-        // {1, -1, 0}
+        vec3(-1,0,0)
     };
     indices = {
-        0, 1, 2,
-        0, 3, 1
+        0, 1, 2
     };
 
     //Fill data structures
     this->mesh = new HalfEdge(vertices, indices);
 
     //Testing
-    this->Cut(vec3(-2.0,2.0,0.0),vec3(0.5,1.0,0.0));
+    this->Cut(vec3(-2.0,2.0,0.0),vec3(1.0,1.0,0.0));
 }
 
 //Rendering the mesh
@@ -56,6 +53,7 @@ void Mesh::renderMesh(){
         vec3 v1 = mesh->vertex_list[f->indices[0]]->position;
         vec3 v2 = mesh->vertex_list[f->indices[1]]->position;
         vec3 v3 = mesh->vertex_list[f->indices[2]]->position;
+        setColor(vec3(1.0f,0.0f,0.0f));
         drawTri(v1,v2,v3);
         setColor(vec3(0,0,0));
         setLineWidth(1);
@@ -64,7 +62,6 @@ void Mesh::renderMesh(){
         drawLine(v3,v1);
     }
 }
-
 
 //Cutting
 void Mesh::Cut(vec3 seedPoint, vec3 normal){
@@ -94,14 +91,23 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
     }
 
     //Remeshing starts here
-    Vertex* vertexLeft = NULL;
-    Vertex* vertexRight = NULL;
-    Edge* edgeLeft = NULL;
-    Edge* edgeRight = NULL;
+    Vertex* vertexLast = NULL;
+    Edge* crossEdgeLeft = NULL;
+    Edge* crossEdgeRight = NULL;
+    Edge* sideEdgeLeft = NULL;
+    Edge* sideEdgeRight = NULL;
 
     //Re-meshing for each intersection point
+    assert(intersections.size() >= 2);
     for(int i=0;i<intersections.size();i++){
-        // this->mesh->reMesh(intersections[i],vertexLeft,vertexRight,edgeLeft,edgeRight,0,normal);
+        if(i==0){
+            this->mesh->reMesh(intersections[i], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
+        }else if(i==intersections.size()-1){
+            this->mesh->reMesh(intersections[i], intersections[i-1], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
+        }else{
+            this->mesh->reMesh(intersections[i], intersections[i-1], intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
+        }
+        cout << i << endl;
     }
 
 
