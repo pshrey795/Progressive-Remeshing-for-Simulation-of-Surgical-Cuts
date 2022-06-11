@@ -147,6 +147,17 @@ HalfEdge::HalfEdge(vector<vec3> Vertices, vector<int> Indices){
         struct Edge* e2 = new Edge(vertex_list[b],f);
         struct Edge* e3 = new Edge(vertex_list[c],f);
 
+        //Linking edges to vertices if not done already 
+        if(vertex_list[a]->edge == NULL){
+            vertex_list[a]->edge = e1;
+        }
+        if(vertex_list[b]->edge == NULL){
+            vertex_list[b]->edge = e2;
+        }
+        if(vertex_list[c]->edge == NULL){
+            vertex_list[c]->edge = e3;
+        }
+
         //Log twin edge values for later linking
         adjList[a][b] = i;
         adjList[b][c] = i+1;
@@ -265,7 +276,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
     bool first = (lastType == -1);
     bool last = (nextType == -1);
     int n = this->vertex_list.size();
-    cout << currentType << " " << lastType << " " << nextType << endl;
+    cout << lastType << " " << currentType << " " << nextType << endl;
 
     //New mesh entities 
     Vertex* newVertex;
@@ -334,7 +345,55 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
             //Depending on the type of the next vertex
             if(nextType == 0){
                 //Current: Vertex, Next: Vertex
+                Vertex* nextVertex = this->vertex_list[get<2>(nextIntPt)];
+                Edge* currentEdge = newVertexLeft->edge;
 
+                //Finding the edge between the current and the next 
+                //intersection point 
+                while(true){
+                    if(currentEdge->twin->next == NULL){
+                        break;
+                    }else{
+                        currentEdge = currentEdge->twin->next;
+                    }
+                }
+
+                while(currentEdge->twin->startVertex != nextVertex){
+                    currentEdge = currentEdge->prev->twin;
+                }
+
+                cout << currentEdge->startVertex->position.x() << " " << currentEdge->startVertex->position.y() << " " << currentEdge->startVertex->position.z() << endl;
+                cout << newVertexRight->position.x() << " " << newVertexRight->position.y() << " " << newVertexRight->position.z() << endl;
+
+                //Edge to Edge relations
+                Edge* newEdge = new Edge();
+                newCrossEdgeLeft = currentEdge->twin;
+                newCrossEdgeLeft->twin = newEdge;
+                newEdge->twin = newCrossEdgeLeft;
+                newCrossEdgeRight->twin = currentEdge;
+                currentEdge->twin = newCrossEdgeRight;
+
+                //Edge to Vertex relations
+                newEdge->startVertex = newVertexLeft;
+                newCrossEdgeRight->startVertex = nextVertex;
+                currentEdge->startVertex = newVertexRight;
+                currentEdge->prev->twin->startVertex = newVertexRight;
+
+                //Vertex to Edge relations
+                newVertexLeft->edge = newEdge;
+                newVertexRight->edge = currentEdge;
+
+                //Face to Vertex relations
+                Face* rightFace = currentEdge->face;
+                for(int i=0;i<3;i++){
+                    if(rightFace->indices[i] == newIndexLeft){
+                        rightFace->indices[i] = newIndexRight;
+                        break;
+                    }
+                }
+
+                this->edge_list.push_back(newEdge);
+                this->edge_list.push_back(newCrossEdgeRight);
             }else if(nextType == 1){
                 //Current: Vertex, Next: Edge
 
@@ -436,6 +495,8 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
             }else if(nextType == 1){
                 //Current:Edge, Next:Edge
                 
+
+
             }else{
 
             }
