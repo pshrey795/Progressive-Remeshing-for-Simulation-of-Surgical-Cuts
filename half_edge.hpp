@@ -362,9 +362,6 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                     currentEdge = currentEdge->prev->twin;
                 }
 
-                cout << currentEdge->startVertex->position.x() << " " << currentEdge->startVertex->position.y() << " " << currentEdge->startVertex->position.z() << endl;
-                cout << newVertexRight->position.x() << " " << newVertexRight->position.y() << " " << newVertexRight->position.z() << endl;
-
                 //Edge to Edge relations
                 Edge* newEdge = new Edge();
                 newCrossEdgeLeft = currentEdge->twin;
@@ -592,7 +589,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                 this->face_list.push_back(newFace);
             }else if(nextType == 1){
                 //Current:Edge, Next:Edge
-                Vertex* newVertex = new Vertex(get<0>(nextIntPt));
+                newVertex = new Vertex(get<0>(nextIntPt));
                 this->vertex_list.push_back(newVertex);
                 int newIndex = this->vertex_list.size()-1;
 
@@ -776,9 +773,19 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
 
         }
     }else if(last){
+        //The last intersection point
+        rightCrossEdge->startVertex = newVertexRight;
+        rightCrossEdge->twin->next->startVertex = newVertexRight;
 
+        Face* rightFace = rightCrossEdge->twin->face;
+        for(int i=0;i<3;i++){
+            if(rightFace->indices[i] == newIndexLeft){
+                rightFace->indices[i] = newIndexRight;
+            }
+        }
+        newVertexRight->edge = rightCrossEdge;
     }else{
-
+        //A middle intersection point
     }
 
     //Reallocating vertices and edges for next intersection point
