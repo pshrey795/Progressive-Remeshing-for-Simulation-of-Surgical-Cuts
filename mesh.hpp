@@ -100,7 +100,7 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
 
     //Re-meshing for each intersection point
     assert(intersections.size() >= 2);
-    for(int i=0;i<intersections.size()-1;i++){
+    for(int i=0;i<intersections.size();i++){
         if(i==0){
             this->mesh->reMesh(intersections[i], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
         }else if(i==intersections.size()-1){

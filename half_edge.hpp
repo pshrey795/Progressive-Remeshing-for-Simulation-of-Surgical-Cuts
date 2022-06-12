@@ -105,7 +105,7 @@ class HalfEdge {
         //8) Direction of normal of plane for splitting
         //Cross Edge: Edge between current intersection point and last intersection point
         //Side Edge: Split edges on the edge of the current intersection point
-        void reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastIntPt, tuple<vec3, int, int> nextIntPt, Vertex* lastVertex, Edge* leftCrossEdge, Edge* rightCrossEdge, Edge* leftSideEdge, Edge* rightSideEdge, vec3 normal);
+        void reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastIntPt, tuple<vec3, int, int> nextIntPt, Vertex* &lastVertex, Edge* &leftCrossEdge, Edge* &rightCrossEdge, Edge* &leftSideEdge, Edge* &rightSideEdge, vec3 normal);
 
     private:
         //Helper functions for checking intersection
@@ -268,7 +268,7 @@ vector<tuple<vec3,int,int>> HalfEdge::IntersectingVertices(vector<int> edges){
 }
 
 //Remeshing 
-void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastIntPt, tuple<vec3, int, int> nextIntPt, Vertex* lastVertex, Edge* leftCrossEdge, Edge* rightCrossEdge, Edge* leftSideEdge, Edge* rightSideEdge, vec3 normal){
+void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastIntPt, tuple<vec3, int, int> nextIntPt, Vertex* &lastVertex, Edge* &leftCrossEdge, Edge* &rightCrossEdge, Edge* &leftSideEdge, Edge* &rightSideEdge, vec3 normal){
     //Auxiliary variables
     int currentType = get<1>(intPt);
     int lastType = get<1>(lastIntPt);
@@ -304,10 +304,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
             this->vertex_list.push_back(newVertexLeft);
         }else{
             newVertexLeft = lastVertex;
-
-            //Seg fault in this line; Investigate
-            vec3 oldPos = newVertexLeft->position;
-            
+            vec3 oldPos = lastVertex->position;
             newVertexLeft->position = oldPos - normal * EPSILON;
             newVertexRight = new Vertex(oldPos + normal * EPSILON);
         }
