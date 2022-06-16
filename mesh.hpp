@@ -47,7 +47,7 @@ Mesh::Mesh(){
     this->mesh = new HalfEdge(vertices, indices);
 
     //Testing
-    this->Cut(vec3(-2.0,2.0,0.0),vec3(1.0,1.0,0.0));
+    this->Cut(vec3(2.0,-2.0,0.0),vec3(-1.0,-1.0,0.0));
 }
 
 //Rendering the mesh
