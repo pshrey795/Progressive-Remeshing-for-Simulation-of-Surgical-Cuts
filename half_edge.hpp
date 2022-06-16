@@ -351,7 +351,9 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                 //Finding the edge between the current and the next 
                 //intersection point 
                 while(true){
-                    if(currentEdge->twin->next == NULL){
+                    if(currentEdge->twin->startVertex == nextVertex){
+                        break;
+                    }else if(currentEdge->twin->next == NULL){
                         break;
                     }else{
                         currentEdge = currentEdge->twin->next;
@@ -786,6 +788,107 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
         newVertexRight->edge = rightCrossEdge;
     }else{
         //A middle intersection point
+        if(lastType == 0){
+            if(currentType == 0){
+                if(nextType == 0){
+                    //Last:Vertex, Current: Vertex, Next: Vertex
+
+                    //Remaining pointer allocations of the last split
+                    rightCrossEdge->startVertex = newVertexRight;
+                    rightCrossEdge->twin->next->startVertex = newVertexRight;
+
+                    Vertex* nextVertex = this->vertex_list[get<2>(nextIntPt)];
+                    Edge* currentEdge = newVertexLeft->edge;
+
+                    //Finding the edge between the current and the next 
+                    //intersection point 
+                    while(true){
+                        if(currentEdge->twin->startVertex == nextVertex){
+                            break;
+                        }else if(currentEdge->twin->next == NULL){
+                            break;
+                        }else{
+                            currentEdge = currentEdge->twin->next;
+                        }
+                    }
+
+                    while(currentEdge->twin->startVertex != nextVertex){
+                        currentEdge = currentEdge->prev->twin;
+                    }
+
+                    //Edge to Edge relations
+                    Edge* newEdge = new Edge();
+                    newCrossEdgeLeft = currentEdge->twin;
+                    newCrossEdgeRight = new Edge();
+                    newCrossEdgeLeft->twin = newEdge;
+                    newEdge->twin = newCrossEdgeLeft;
+                    newCrossEdgeRight->twin = currentEdge;
+                    currentEdge->twin = newCrossEdgeRight;
+
+                    //Edge to Vertex relations
+                    newEdge->startVertex = newVertexLeft;
+                    newCrossEdgeRight->startVertex = nextVertex;
+                    currentEdge->startVertex = newVertexRight;
+                    currentEdge->prev->twin->startVertex = newVertexRight;
+
+                    //Vertex to Edge relations
+                    newVertexLeft->edge = newEdge;
+                    newVertexRight->edge = currentEdge;
+
+                    //Face to Vertex relations
+                    Face* oldRightFace = rightCrossEdge->twin->face;
+                    for(int i=0;i<3;i++){
+                        if(oldRightFace->indices[i] == newIndexLeft){
+                            oldRightFace->indices[i] = newIndexRight;
+                            break;
+                        }
+                    }
+                    Face* rightFace = currentEdge->face;
+                    for(int i=0;i<3;i++){
+                        if(rightFace->indices[i] == newIndexLeft){
+                            rightFace->indices[i] = newIndexRight;
+                            break;
+                        }
+                    }
+
+                    this->edge_list.push_back(newEdge);
+                    this->edge_list.push_back(newCrossEdgeRight);
+                }else if(nextType == 1){
+                    //Last:Vertex, Current: Vertex, Next: Edge
+                    
+                }else{
+
+                }
+            }else{
+                if(nextType == 0){
+                    //Last:Vertex, Current: Edge, Next: Vertex
+                }else if(nextType == 1){
+                    //Last:Vertex, Current: Edge, Next: Edge
+                }else{
+
+                }
+            }
+        }else if(lastType == 1){
+            if(currentType == 0){
+                if(nextType == 0){
+                    //Last:Edge, Current: Vertex, Next: Vertex
+                }else if(nextType == 1){
+                    //Last:Edge, Current: Vertex, Next: Edge
+                }else{
+
+                }
+            }else{
+                if(nextType == 0){
+                    //Last:Edge, Current: Edge, Next: Vertex
+                }else if(nextType == 1){
+                    //Last:Edge, Current: Edge, Next: Edge
+                }else{
+                    
+                }
+            }
+        }else{
+
+        }
     }
 
     //Reallocating vertices and edges for next intersection point

@@ -33,17 +33,21 @@ Mesh::Mesh(){
         vec3(0,0,0),
         vec3(0,1,0),
         vec3(-1,0,0),
-        // vec3(-1,1,0)
+        vec3(-1,1,0),
+        vec3(1,-1,0)
     };
     indices = {
-        0, 1, 2
+        0, 1, 3,
+        0, 3, 2,
+        0, 2, 4,
+        0, 4, 1
     };
 
     //Fill data structures
     this->mesh = new HalfEdge(vertices, indices);
 
     //Testing
-    this->Cut(vec3(-1.0,1.0,0.0),vec3(1.5,1.0,0.0));
+    this->Cut(vec3(-2.0,2.0,0.0),vec3(1.0,1.0,0.0));
 }
 
 //Rendering the mesh
