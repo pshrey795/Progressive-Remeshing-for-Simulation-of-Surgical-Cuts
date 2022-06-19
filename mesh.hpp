@@ -13,12 +13,14 @@ using namespace Eigen;
 class Mesh {
     private:
         HalfEdge *mesh;
+        void removeDuplicates(vector<tuple<vec3,int,int>> &vertices);
+        void setupMesh(vector<vec3> Vertices, vector<int> Indices);
+
 
     public:
         Mesh();
         void Cut(vec3 seedPoint, vec3 normal);
         void Tear(vec3 startPoint, vec3 endPoint);
-        void setupMesh(vector<vec3> Vertices, vector<int> Indices);
         void renderMesh(); 
 
 };
@@ -30,24 +32,45 @@ Mesh::Mesh(){
     vector<int> indices;
 
     vertices = {
-        vec3(0,0,0),
-        vec3(0,1,0),
-        vec3(-1,0,0),
         vec3(-1,1,0),
-        vec3(1,-1,0)
+        vec3(0,1,0),
+        vec3(1,1,0),
+        vec3(-1,0,0),
+        vec3(0,0,0),
+        vec3(1,0,0),
+        vec3(-1,-1,0),
+        vec3(0,-1,0),
+        vec3(1,-1,0),
     };
     indices = {
-        0, 1, 3,
-        0, 3, 2,
-        0, 2, 4,
-        0, 4, 1
+        0, 3, 4,
+        0, 4, 1,
+        1, 4, 5,
+        1, 5, 2,
+        3, 6, 4,
+        4, 6, 7,
+        4, 7, 5,
+        5, 7, 8,
     };
 
     //Fill data structures
     this->mesh = new HalfEdge(vertices, indices);
 
     //Testing
-    this->Cut(vec3(2.0,-2.0,0.0),vec3(-1.0,-1.0,0.0));
+    this->Cut(vec3(-2.0,2.0,0.0),vec3(1.0,1.0,0.0));
+}
+
+//Remove duplicates elements from a sorted vector
+void Mesh::removeDuplicates(vector<tuple<vec3,int,int>> &vertices){
+    int i = 0;
+    while(i < vertices.size()-1){
+        if(get<0>(vertices[i]) == get<0>(vertices[i+1])){
+            vertices.erase(vertices.begin()+i);
+        }
+        else{
+            i++;
+        }
+    }
 }
 
 //Rendering the mesh
@@ -88,6 +111,7 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
 
     //Sort intersections by direction
     sort(intersections.begin(), intersections.end(), directionSort);
+    removeDuplicates(intersections);
 
     //Testing
     for(auto x:intersections){
@@ -112,7 +136,6 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
         }else{
             this->mesh->reMesh(intersections[i], intersections[i-1], intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
         }
-        cout << i << endl;
     }
 
 
