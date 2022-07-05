@@ -30,28 +30,50 @@ Mesh::Mesh(){
     vector<vec3> vertices;
     vector<int> indices;
 
-    for(int i = 0;i < 50;i++){
-        for(int j = 0;j < 50;j++){
-            vertices.push_back(vec3(i*0.5,j*0.5,0));
-        }
-    }
+    vertices = {
+        vec3(-1,1,0),
+        vec3(0,1,0),
+        vec3(1,1,0),
+        vec3(-1,0,0),
+        vec3(0,0,0),
+        vec3(1,0,0),
+        vec3(-1,-1,0),
+        vec3(0,-1,0),
+        vec3(1,-1,0),
+    };
+    indices = {
+        0, 3, 4,
+        0, 4, 1,
+        1, 4, 5,
+        1, 5, 2,
+        3, 6, 4,
+        4, 6, 7,
+        4, 7, 5,
+        5, 7, 8,
+    };
 
-    for(int i = 0;i < 49;i++){
-        for(int j = 0;j < 49;j++){
-            indices.push_back(i*50+j);
-            indices.push_back((i+1)*50 + j);
-            indices.push_back((i+1)*50 + j+1);
-            indices.push_back(i*50+j);
-            indices.push_back((i+1)*50 + j+1);
-            indices.push_back(i*50 + j + 1);
-        }
-    }
+    // for(int i = 0;i < 50;i++){
+    //     for(int j = 0;j < 50;j++){
+    //         vertices.push_back(vec3(i*0.5,j*0.5,0));
+    //     }
+    // }
+
+    // for(int i = 0;i < 49;i++){
+    //     for(int j = 0;j < 49;j++){
+    //         indices.push_back(i*50+j);
+    //         indices.push_back((i+1)*50 + j);
+    //         indices.push_back((i+1)*50 + j+1);
+    //         indices.push_back(i*50+j);
+    //         indices.push_back((i+1)*50 + j+1);
+    //         indices.push_back(i*50 + j + 1);
+    //     }
+    // }
 
     //Fill data structures
     this->mesh = new HalfEdge(vertices, indices);
 
     //Testing
-    this->Cut(vec3(-2.0,14.0,0.0),vec3(1.0,2.0,0.0));
+    this->Cut(vec3(-2.0,2.0,0.0),vec3(1.0,1.0,0.0));
 }
 
 //Filter intersection points
@@ -104,12 +126,12 @@ void Mesh::renderMesh(){
 void Mesh::Cut(vec3 seedPoint, vec3 normal){
     //Create plane for cut and intersect it with mesh
     Plane plane(seedPoint, normal);
-    vector<tuple<vec3, int, int>> intersections = mesh->Intersect(plane);
-    if(intersections.size() == 0){
+    vector<tuple<vec3, int, int>> intersections2 = mesh->Intersect(plane);
+    if(intersections2.size() == 0){
         cout << "No intersections" << endl;
         return;
     }
-    vec3 direction = (get<0>(intersections[0]) - seedPoint).normalized();
+    vec3 direction = (get<0>(intersections2[0]) - seedPoint).normalized();
 
     auto directionSort = [seedPoint, direction] (tuple<vec3, int, int> a, tuple<vec3, int, int> b) -> bool
     {
@@ -119,7 +141,15 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
     };
 
     //Sort intersections by direction
-    sort(intersections.begin(), intersections.end(), directionSort);
+    sort(intersections2.begin(), intersections2.end(), directionSort);
+
+    this->mesh->vertex_list.push_back(new Vertex(vec3(0.25,-0.25,0)));
+    this->mesh->vertex_list.push_back(new Vertex(vec3(0.75,-0.75,0)));
+
+    vector<tuple<vec3, int, int>> intersections;
+    intersections.push_back(make_tuple(vec3(0.25,-0.25,0),2,mesh->vertex_list.size()-2));
+    intersections.push_back(intersections2[2]);    
+    intersections.push_back(make_tuple(vec3(0.75,-0.75,0),2,mesh->vertex_list.size()-1));
 
     //Testing
     for(auto x:intersections){
