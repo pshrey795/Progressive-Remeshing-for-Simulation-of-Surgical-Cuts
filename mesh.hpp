@@ -14,12 +14,13 @@ class Mesh {
     private:
         HalfEdge *mesh;
         void setupMesh(vector<vec3> Vertices, vector<int> Indices);
-        vector<tuple<vec3, int, int>> filterAndSort(vector<tuple<vec3, int, int>> intersections, vec3 startPoint, vec3 endPoint);
+        vector<tuple<vec3, int, int>> filterAndSort(vector<tuple<vec3, int, int>> intersections, vec3 startPoint, vec3 endPoint, bool first);
 
     public:
         Mesh();
+        void update(float dt);
         void Cut(vec3 seedPoint, vec3 normal);
-        void Tear(vec3 startPoint, vec3 endPoint, vec3 normal);
+        void Tear(vector<vec3> startPoints, vector<vec3> endPoints, vector<vec3> normals);
         void renderMesh(); 
 
 };
@@ -73,19 +74,38 @@ Mesh::Mesh(){
     this->mesh = new HalfEdge(vertices, indices);
 
     //Testing
-    // this->Cut(vec3(-2.0,2.0,0.0),vec3(1.0,1.0,0.0));
-    this->Tear(vec3(-0.75,-0.5,0), vec3(0.25,-0.25,0), vec3(-1.0,4.0,0.0));
+    // this->Cut(vec3(-2.0,14.0,0.0),vec3(1.0,1.5,0.0));
+    vector<vec3> startPoints = {
+        vec3(-0.875,-0.75,0),
+        vec3(0.25,-0.25,0)
+    };
+    vector<vec3> endPoints = {
+        vec3(0.25,-0.25,0),
+        vec3(0.75,0.75,0)
+    };
+    vector<vec3> normals = {
+        vec3(-4,9,0),
+        vec3(-2,1,0)
+    };
+    this->Tear(startPoints, endPoints, normals);
+}
+
+//Mesh Update
+void Mesh::update(float dt){
+    
 }
 
 //Filter intersection points
-vector<tuple<vec3,int,int>> Mesh::filterAndSort(vector<tuple<vec3,int,int>> intersections, vec3 startPoint, vec3 endPoint){
+vector<tuple<vec3,int,int>> Mesh::filterAndSort(vector<tuple<vec3,int,int>> intersections, vec3 startPoint, vec3 endPoint,bool first){
     vector<tuple<vec3,int,int>> filteredIntersections;
     vec3 direction = endPoint - startPoint;
     double lowerBound = direction.dot(startPoint - startPoint);
     double upperBound = direction.dot(endPoint - startPoint);
     int currentSize = this->mesh->vertex_list.size();
-    this->mesh->vertex_list.push_back(new Vertex(startPoint));
-    filteredIntersections.push_back(make_tuple(startPoint,2,currentSize++));
+    if(first){
+        this->mesh->vertex_list.push_back(new Vertex(startPoint));
+        filteredIntersections.push_back(make_tuple(startPoint,2,currentSize++));
+    }
     for(auto x : intersections){
         vec3 point = get<0>(x);
         double dist = direction.dot(point - startPoint);
@@ -127,12 +147,12 @@ void Mesh::renderMesh(){
 void Mesh::Cut(vec3 seedPoint, vec3 normal){
     //Create plane for cut and intersect it with mesh
     Plane plane(seedPoint, normal);
-    vector<tuple<vec3, int, int>> intersections2 = mesh->Intersect(plane);
-    if(intersections2.size() == 0){
+    vector<tuple<vec3, int, int>> intersections = mesh->Intersect(plane);
+    if(intersections.size() == 0){
         cout << "No intersections" << endl;
         return;
     }
-    vec3 direction = (get<0>(intersections2[0]) - seedPoint).normalized();
+    vec3 direction = (get<0>(intersections[0]) - seedPoint).normalized();
 
     auto directionSort = [seedPoint, direction] (tuple<vec3, int, int> a, tuple<vec3, int, int> b) -> bool
     {
@@ -142,15 +162,7 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
     };
 
     //Sort intersections by direction
-    sort(intersections2.begin(), intersections2.end(), directionSort);
-
-    this->mesh->vertex_list.push_back(new Vertex(vec3(0.25,-0.25,0)));
-    this->mesh->vertex_list.push_back(new Vertex(vec3(0.75,-0.75,0)));
-
-    vector<tuple<vec3, int, int>> intersections;
-    intersections.push_back(make_tuple(vec3(0.25,-0.25,0),2,mesh->vertex_list.size()-2));
-    intersections.push_back(intersections2[2]);    
-    intersections.push_back(make_tuple(vec3(0.75,-0.75,0),2,mesh->vertex_list.size()-1));
+    sort(intersections.begin(), intersections.end(), directionSort);
 
     //Testing
     for(auto x:intersections){
@@ -179,21 +191,28 @@ void Mesh::Cut(vec3 seedPoint, vec3 normal){
 }
 
 //Tearing
-void Mesh::Tear(vec3 startPoint, vec3 endPoint, vec3 normal){
-    //The normal should be perpendicular to the line joining the end points of the cut
-    assert(normal.dot(endPoint-startPoint) == 0);
+void Mesh::Tear(vector<vec3> startPoints, vector<vec3> endPoints, vector<vec3> normals){
+    vector<tuple<vec3, int, int>> intersections;
+    vector<vec3> allNormals;
 
-    //Define the plane for cut and intersect it with mesh
-    Plane plane(startPoint, normal);
-    vector<tuple<vec3, int, int>> intersections = mesh->Intersect(plane);
+    for(int i=0;i<startPoints.size();i++){
+        //The normal should be perpendicular to the line joining the end points of the cut
+        assert(normals[i].dot(endPoints[i]-startPoints[i]) == 0);
 
-    //Filter(to obtain points only in between the end points) and sort them by direction for progressive re-meshing
-    intersections = filterAndSort(intersections,startPoint,endPoint);
+        //Define the plane for cut and intersect it with mesh
+        Plane plane(startPoints[i], normals[i]);
+        vector<tuple<vec3, int, int>> intersection = mesh->Intersect(plane);
 
-    //Testing
-    for(auto x:intersections){
-        vec3 points = get<0>(x);
-        cout << points[0] << " " << points[1] << " " << points[2] << " " << "\n";
+        //Filter(to obtain points only in between the end points) and sort them by direction for progressive re-meshing
+        intersection = filterAndSort(intersection,startPoints[i],endPoints[i],(i==0)?true:false);
+
+        //Testing
+        for(auto x:intersection){
+            intersections.push_back(x);
+            allNormals.push_back(normals[i].normalized());
+            vec3 points = get<0>(x);
+            cout << points[0] << " " << points[1] << " " << points[2] << " " << "\n";
+        }
     }
 
     //Remeshing starts here
@@ -207,11 +226,11 @@ void Mesh::Tear(vec3 startPoint, vec3 endPoint, vec3 normal){
     assert(intersections.size() >= 2);
     for(int i=0;i<intersections.size();i++){
         if(i==0){
-            this->mesh->reMesh(intersections[i], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
+            this->mesh->reMesh(intersections[i], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, allNormals[i]); 
         }else if(i==intersections.size()-1){
-            this->mesh->reMesh(intersections[i], intersections[i-1], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
+            this->mesh->reMesh(intersections[i], intersections[i-1], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, allNormals[i]); 
         }else{
-            this->mesh->reMesh(intersections[i], intersections[i-1], intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normal.normalized()); 
+            this->mesh->reMesh(intersections[i], intersections[i-1], intersections[i+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, allNormals[i]); 
         }
     }
 

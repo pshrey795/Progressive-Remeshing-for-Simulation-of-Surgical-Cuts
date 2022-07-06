@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
         camera.processInput(window);
         if (!paused)
             update(dt);
+        mesh.update(dt);
         window.prepareDisplay();
         drawWorld();
         window.updateDisplay();
