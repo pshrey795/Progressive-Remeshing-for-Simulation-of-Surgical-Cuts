@@ -27,67 +27,7 @@ class Mesh {
 
 //Mesh constructor
 Mesh::Mesh(){
-    //Add sample geometry
-    vector<vec3> vertices;
-    vector<int> indices;
-
-    vertices = {
-        vec3(-1,1,0),
-        vec3(0,1,0),
-        vec3(1,1,0),
-        vec3(-1,0,0),
-        vec3(0,0,0),
-        vec3(1,0,0),
-        vec3(-1,-1,0),
-        vec3(0,-1,0),
-        vec3(1,-1,0),
-    };
-    indices = {
-        0, 3, 4,
-        0, 4, 1,
-        1, 4, 5,
-        1, 5, 2,
-        3, 6, 4,
-        4, 6, 7,
-        4, 7, 5,
-        5, 7, 8,
-    };
-
-    // for(int i = 0;i < 50;i++){
-    //     for(int j = 0;j < 50;j++){
-    //         vertices.push_back(vec3(i*0.5,j*0.5,0));
-    //     }
-    // }
-
-    // for(int i = 0;i < 49;i++){
-    //     for(int j = 0;j < 49;j++){
-    //         indices.push_back(i*50+j);
-    //         indices.push_back((i+1)*50 + j);
-    //         indices.push_back((i+1)*50 + j+1);
-    //         indices.push_back(i*50+j);
-    //         indices.push_back((i+1)*50 + j+1);
-    //         indices.push_back(i*50 + j + 1);
-    //     }
-    // }
-
-    //Fill data structures
-    this->mesh = new HalfEdge(vertices, indices);
-
-    //Testing
-    // this->Cut(vec3(-2.0,14.0,0.0),vec3(1.0,1.5,0.0));
-    vector<vec3> startPoints = {
-        vec3(-0.875,-0.75,0),
-        vec3(0.25,-0.25,0)
-    };
-    vector<vec3> endPoints = {
-        vec3(0.25,-0.25,0),
-        vec3(0.75,0.75,0)
-    };
-    vector<vec3> normals = {
-        vec3(-4,9,0),
-        vec3(-2,1,0)
-    };
-    this->Tear(startPoints, endPoints, normals);
+    
 }
 
 //Mesh Update
@@ -197,7 +137,7 @@ void Mesh::Tear(vector<vec3> startPoints, vector<vec3> endPoints, vector<vec3> n
 
     for(int i=0;i<startPoints.size();i++){
         //The normal should be perpendicular to the line joining the end points of the cut
-        assert(normals[i].dot(endPoints[i]-startPoints[i]) == 0);
+        // assert(normals[i].dot(endPoints[i]-startPoints[i]) == 0);
 
         //Define the plane for cut and intersect it with mesh
         Plane plane(startPoints[i], normals[i]);

@@ -2,7 +2,6 @@
 #include "draw.hpp"
 #include "gui.hpp"
 #include "lighting.hpp"
-#include "particle_system.hpp"
 #include "mesh.hpp"
 
 #include <bits/stdc++.h>
@@ -18,16 +17,12 @@ float dt = 1/60.0;
 float t = 0;
 bool paused = false;
 
-void drawStuff() {
-    mesh.renderMesh();
-}
-
 void drawWorld() {
     camera.apply(window);
     lighting.apply();
     clear(vec3(0.5,0.7,0.9));
     setColor(vec3(0.7,0.7,0.7));
-    drawStuff();
+    mesh.renderMesh();
     setColor(vec3(0,0,0));
 }
 

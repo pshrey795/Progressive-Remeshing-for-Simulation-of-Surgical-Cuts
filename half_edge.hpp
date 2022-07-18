@@ -7,7 +7,7 @@
 using namespace std;
 using namespace Eigen;
 
-#define EPSILON 0.02
+#define EPSILON 0.04
 #define DELTA 0.01
 
 struct Edge{
