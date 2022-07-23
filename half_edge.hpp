@@ -376,7 +376,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
         }
     }
 
-    //Complete Restructuring of data strcuture based on cases
+    //Complete Restructuring of data structure based on cases
     if(first){
         if(currentType == 0){
             
@@ -466,7 +466,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                 newCrossEdgeRight->twin = newEdge2;
                 newEdge2->twin = newCrossEdgeRight;
                 newSideEdgeLeft->twin = currentEdge->next;
-                currentEdge->next->twin = newSideEdgeRight;
+                currentEdge->next->twin = newSideEdgeLeft;
                 newSideEdgeRight->twin = newEdge3;
                 newEdge3->twin = newSideEdgeRight;
 
@@ -1223,7 +1223,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                     newCrossEdgeRight->twin = newEdge2;
                     newEdge2->twin = newCrossEdgeRight;
                     newSideEdgeLeft->twin = currentEdge->next;
-                    currentEdge->next->twin = newSideEdgeRight;
+                    currentEdge->next->twin = newSideEdgeLeft;
                     newSideEdgeRight->twin = newEdge3;
                     newEdge3->twin = newSideEdgeRight;
 
@@ -2147,7 +2147,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                     newCrossEdgeRight->twin = newEdge2;
                     newEdge2->twin = newCrossEdgeRight;
                     newSideEdgeLeft->twin = currentEdge->next;
-                    currentEdge->next->twin = newSideEdgeRight;
+                    currentEdge->next->twin = newSideEdgeLeft;
                     newSideEdgeRight->twin = newEdge3;
                     newEdge3->twin = newSideEdgeRight;
 
@@ -3093,7 +3093,7 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
                     newCrossEdgeRight->twin = newEdge2;
                     newEdge2->twin = newCrossEdgeRight;
                     newSideEdgeLeft->twin = currentEdge->next;
-                    currentEdge->next->twin = newSideEdgeRight;
+                    currentEdge->next->twin = newSideEdgeLeft;
                     newSideEdgeRight->twin = newEdge3;
                     newEdge3->twin = newSideEdgeRight;
 
@@ -3708,6 +3708,5 @@ void HalfEdge::reMesh(tuple<vec3, int, int> intPt, tuple<vec3, int, int> lastInt
     leftSideEdge = newSideEdgeLeft;
     rightSideEdge = newSideEdgeRight;
 }
-
 
 #endif

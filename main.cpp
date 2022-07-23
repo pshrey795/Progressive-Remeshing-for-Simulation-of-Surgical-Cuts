@@ -43,9 +43,11 @@ int main(int argc, char **argv) {
 
     while (!window.shouldClose()) {
         camera.processInput(window);
-        if (!paused)
+        mesh.processInput(window);
+        if (!paused){
             update(dt);
-        mesh.update(dt);
+            mesh.update(dt);
+        }
         window.prepareDisplay();
         drawWorld();
         window.updateDisplay();

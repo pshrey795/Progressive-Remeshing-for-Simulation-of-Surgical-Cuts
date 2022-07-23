@@ -2,32 +2,69 @@
 #define CURVE_CPP
 
 #include "common.hpp"
+#include<bits/stdc++.h>
 
 using namespace std;
 
+bool double_eq(double a, double b){
+    return (abs(a-b) <= 0.01f);
+}
+
+long long factorial(int n){
+    long long res = 1;
+    for(int i=1;i<=n;i++){
+        res *= (long long)i;
+    }
+    return res;
+}
+
+double C(int n, int r){
+    return (double)factorial(n)/((double)(factorial(r)*factorial(n-r)));
+}
+
+double power(double x, int n){
+    if(n==0){
+        return 1;
+    }else{
+        return pow(x,n);
+    }
+}
+
 class Curve {
 
-    public:
-        vec3 b0;
-        vec3 b1;
-        vec3 b2;
-        vec3 b3;
+    private:
+        int size;
+        vector<vec3> controlPts;
         int axis;
 
-        Curve(vec3 b0, vec3 b1, vec3 b2, vec3 b3, int axis){
-            this->b0 = b0;
-            this->b1 = b1;
-            this->b2 = b2;
-            this->b3 = b3;
+    public:
+        Curve(vector<vec3> inputPts, int axis){
+            this->size = inputPts.size();
+            for(int i = 0; i < this->size; i++){
+                this->controlPts.push_back(inputPts[i]);
+            }
             this->axis = axis;
         }
 
         vec3 getPoint(float t){
-            float J0 = (1.0f - t) * (1.0f - t) * (1.0f - t);
-            float J1 = 3.0f * t * (1.0f - t) * (1.0f - t);
-            float J2 = 3.0f * t * t * (1.0f - t);
-            float J3 = t * t * t;
-            return J0 * this->b0 + J1 * this->b1 + J2 * this->b2 + J3 * this->b3;
+            vec3 pt = vec3(0,0,0);
+            int n = size - 1;
+            for(int i=0;i<size;i++){
+                float Ji = C(n,i) * power(t,i) * power(1.0f-t,n-i);
+                pt += (controlPts[i] * Ji);
+            }
+            return pt;
+        }
+
+        vec3 getTangent(float t){
+            vec3 tangent = vec3(0,0,0);
+            int n = size - 1;
+            for(int i=0;i<size;i++){
+                float Ji = i * C(n,i) * power(t,i-1) * power(1.0f-t,n-i);
+                Ji -= (size-i) * C(n,i) * power(t,i) * power(1.0f-t,n-i-1);
+                tangent += controlPts[i] * Ji; 
+            }
+            return tangent;
         }
 
 };
