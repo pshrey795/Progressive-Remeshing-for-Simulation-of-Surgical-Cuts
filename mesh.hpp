@@ -14,6 +14,7 @@ using namespace Eigen;
 class Mesh {
     private:
         bool isPlaying = false;
+        int count = 0;
         double t = 0;
         HalfEdge *mesh;
         Path* currentPath = NULL;
@@ -70,7 +71,8 @@ Mesh::Mesh(){
 //Mesh Update
 void Mesh::update(float dt){
     //Update the mesh
-    if(isPlaying){
+    count = (count + 1) % 3;
+    if(isPlaying && count == 0){
         if(currIntersectIdx < intersectPts.size()){
             if(currIntersectIdx == 0){
                 this->mesh->reMesh(intersectPts[currIntersectIdx], make_tuple(vec3(0.0f, 0.0f, 0.0f), -1, -1), intersectPts[currIntersectIdx+1], vertexLast, crossEdgeLeft, crossEdgeRight, sideEdgeLeft, sideEdgeRight, normals[currIntersectIdx]);

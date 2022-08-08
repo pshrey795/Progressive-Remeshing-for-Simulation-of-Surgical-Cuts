@@ -38,7 +38,7 @@ void keyPressed(int key) {
 int main(int argc, char **argv) {
     window.create("Test Window", 1920, 1080);
     window.onKeyPress(keyPressed);
-    camera.lookAt(vec3(-20,-20,20), vec3(0,0,0));
+    camera.lookAt(vec3(12.5,12.5,50), vec3(12.5,12.5,0));
     lighting.createDefault();
 
     while (!window.shouldClose()) {
