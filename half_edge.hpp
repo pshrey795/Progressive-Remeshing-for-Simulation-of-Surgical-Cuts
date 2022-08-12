@@ -52,16 +52,19 @@ struct Vertex{
 struct Face{
     struct Edge *edge;
     int indices[3];
-    Face(int a, int b, int c){
+    bool reMeshed = false;
+    Face(int a, int b, int c, bool isRemeshed = true){
         indices[0] = a;
         indices[1] = b;
         indices[2] = c;
+        reMeshed = isRemeshed;
         edge = NULL;
     }
     void setFace(int a, int b, int c){
         indices[0] = a;
         indices[1] = b;
         indices[2] = c;
+        reMeshed = true;
     }
     Face(){
         edge = NULL;
@@ -152,7 +155,7 @@ HalfEdge::HalfEdge(vector<vec3> Vertices, vector<int> Indices){
         c = Indices[i+2];
 
         //Create Face and Half Edges
-        struct Face* f = new Face(a,b,c);
+        struct Face* f = new Face(a,b,c,false);
         struct Edge* e1 = new Edge(vertex_list[a],f);
         struct Edge* e2 = new Edge(vertex_list[b],f);
         struct Edge* e3 = new Edge(vertex_list[c],f);

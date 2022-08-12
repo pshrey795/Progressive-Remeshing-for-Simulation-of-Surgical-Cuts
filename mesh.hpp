@@ -34,6 +34,7 @@ class Mesh {
 
     public:
         Mesh();
+        bool changeColor = false; 
         void update(float dt);
         void processInput(Window &window);
         void renderMesh(); 
@@ -71,7 +72,7 @@ Mesh::Mesh(){
 //Mesh Update
 void Mesh::update(float dt){
     //Update the mesh
-    count = (count + 1) % 3;
+    count = (count + 1) % 2;
     if(isPlaying && count == 0){
         if(currIntersectIdx < intersectPts.size()){
             if(currIntersectIdx == 0){
@@ -195,7 +196,11 @@ void Mesh::renderMesh(){
         vec3 v1 = mesh->vertex_list[f->indices[0]]->position;
         vec3 v2 = mesh->vertex_list[f->indices[1]]->position;
         vec3 v3 = mesh->vertex_list[f->indices[2]]->position;
-        setColor(vec3(1.0f,0.0f,0.0f));
+        if(f->reMeshed && changeColor){
+            setColor(vec3(0.0f, 1.0f, 0.0f));
+        }else{
+            setColor(vec3(1.0f,0.0f,0.0f));
+        }
         drawTri(v1,v2,v3);
         setColor(vec3(0,0,0));
         setLineWidth(1);

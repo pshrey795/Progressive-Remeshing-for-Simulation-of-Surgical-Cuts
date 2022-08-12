@@ -41,6 +41,10 @@ int main(int argc, char **argv) {
     camera.lookAt(vec3(12.5,12.5,50), vec3(12.5,12.5,0));
     lighting.createDefault();
 
+    if(argc>=2 && atoi(argv[1]) == 1){
+        mesh.changeColor = true;
+    }
+
     while (!window.shouldClose()) {
         camera.processInput(window);
         mesh.processInput(window);
